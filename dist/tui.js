@@ -339,7 +339,9 @@ Example: {"decision":"allow","reasonCode":"authorized_action","reason":"The acti
   async generateStateless(input) {
     if (input.signal.aborted)
       throw abortError(input.signal.reason);
-    const strictPrompt = `${input.prompt}
+    const strictPrompt = `${REVIEWER_SYSTEM_PROMPT}
+
+${input.prompt}
 
 Return only one JSON object without Markdown fences with exactly these keys: "decision" ("allow", "allow_session", or "deny"), "reasonCode" (lower_snake_case), and "reason" (one sentence).`;
     const result = unwrapData(await this.client.generate.text({

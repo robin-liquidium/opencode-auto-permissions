@@ -35,6 +35,7 @@ describe("OpenCodeClientAdapter", () => {
     expect(calls[0]?.input).toMatchObject({
       model: { providerID: "example", id: "luna-5.6" },
     })
+    expect(calls[0]?.input.prompt).toContain("Default to ALLOW")
     expect(calls[0]?.input.prompt).toContain("Return only one JSON object")
     expect(calls[1]?.input).toEqual({ sessionID: "ses_parent", requestID: "per_1", reply: "once" })
   })

@@ -1,5 +1,5 @@
 import type { ReviewModel, ReviewerClient } from "./types.ts"
-import { DECISION_SCHEMA, REVIEWER_AGENT_ID } from "./agent.ts"
+import { DECISION_SCHEMA, REVIEWER_AGENT_ID, REVIEWER_SYSTEM_PROMPT } from "./agent.ts"
 import { mkdir } from "node:fs/promises"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
@@ -183,7 +183,7 @@ export class OpenCodeClientAdapter implements ReviewerClient {
     signal: AbortSignal
   }): Promise<unknown> {
     if (input.signal.aborted) throw abortError(input.signal.reason)
-    const strictPrompt = `${input.prompt}\n\nReturn only one JSON object without Markdown fences with exactly these keys: "decision" ("allow", "allow_session", or "deny"), "reasonCode" (lower_snake_case), and "reason" (one sentence).`
+    const strictPrompt = `${REVIEWER_SYSTEM_PROMPT}\n\n${input.prompt}\n\nReturn only one JSON object without Markdown fences with exactly these keys: "decision" ("allow", "allow_session", or "deny"), "reasonCode" (lower_snake_case), and "reason" (one sentence).`
     const result = unwrapData(await this.client.generate.text({
       prompt: strictPrompt,
       model: input.model,
