@@ -21,12 +21,12 @@ opencode plugin -g opencode-auto-permissions
 
 That is the complete plugin installation. You do not need to clone this repository, install Bun, run `npm install`, choose a reviewer model, or edit plugin entries manually.
 
-OpenCode downloads the package, detects its separate server and TUI targets, and adds `opencode-auto-permissions` to:
+OpenCode downloads the package and adds `opencode-auto-permissions` to:
 
 - `~/.config/opencode/opencode.json` for the server integration.
-- `~/.config/opencode/cli.json` for the V2 TUI integration.
+- `~/.config/opencode/cli.json` only when a transitional runtime needs the TUI fallback.
 
-Quit and restart OpenCode after installation because configuration is loaded at startup. Auto Permissions automatically uses the model and variant selected by the session that requested the action. It also detects whether the server or TUI integration owns permission review, so only one reviewer handles each request.
+Quit and restart OpenCode after installation because configuration is loaded at startup. Auto Permissions automatically uses the model and variant selected by the session that requested the action. Current V2 reviews permissions on the server so local, remote, web, and multiple simultaneous clients share one reviewer.
 
 ## Configure Permissions
 
