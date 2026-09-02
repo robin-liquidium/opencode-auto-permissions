@@ -20727,6 +20727,8 @@ class OpenCodeClientAdapter {
     this.client = client;
   }
   async prewarm() {
+    if (typeof this.client.generate?.text === "function")
+      return;
     await mkdir2(REVIEWER_DIRECTORY, { recursive: true });
     const location = { directory: REVIEWER_DIRECTORY };
     const requests = [];
@@ -20749,8 +20751,10 @@ class OpenCodeClientAdapter {
     await Promise.all(requests);
   }
   async generate(input) {
+    if (typeof this.client.generate?.text === "function")
+      return this.generateStateless(input);
     if (typeof this.client.permission?.request?.list === "function")
-      return this.generateCurrent(input);
+      return this.generateCurrentSession(input);
     const stable = typeof this.client.postSessionIdPermissionsPermissionId === "function";
     const session = stable ? this.client.session : this.client.v2?.session ?? this.client.session;
     if (!session || typeof session.create !== "function" || typeof session.prompt !== "function") {
@@ -20878,7 +20882,22 @@ Example: {"decision":"allow","reasonCode":"authorized_action","reason":"The acti
       throw error;
     }
   }
-  async generateCurrent(input) {
+  async generateStateless(input) {
+    if (input.signal.aborted)
+      throw abortError(input.signal.reason);
+    const strictPrompt = `${input.prompt}
+
+Return only one JSON object without Markdown fences with exactly these keys: "decision" ("allow", "allow_session", or "deny"), "reasonCode" (lower_snake_case), and "reason" (one sentence).`;
+    const result3 = unwrapData(await this.client.generate.text({
+      prompt: strictPrompt,
+      model: input.model
+    }, { signal: input.signal }));
+    if (!isRecord(result3) || typeof result3.text !== "string") {
+      throw new Error("OpenCode reviewer returned no text output");
+    }
+    return JSON.parse(result3.text);
+  }
+  async generateCurrentSession(input) {
     await mkdir2(REVIEWER_DIRECTORY, { recursive: true });
     let sessionID;
     const abortRemote = () => {
